@@ -41,66 +41,74 @@ function LoginForm() {
   return (
     <div className="min-h-screen bg-[#0d1f35] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Logo card */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 mb-5 overflow-hidden">
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          {/* Blue header band with logo */}
+          <div className="bg-[#4DA8DA] px-8 py-8 flex flex-col items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Crystal Clear" className="w-20 h-20 object-contain" />
+            <img
+              src="/logo.png"
+              alt="Crystal Clear"
+              className="h-16 w-auto object-contain"
+            />
+            <p className="text-white/80 text-sm mt-3 font-medium tracking-wide">
+              Cleaning & Contracting
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-white">Crystal Clear</h1>
-          <p className="text-white/50 text-sm mt-1">Cleaning & Contracting · Estimator</p>
-        </div>
 
-        {/* Form card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-7">
-          <h2 className="text-lg font-semibold text-gray-900 mb-5">Sign in to continue</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#4DA8DA]/30 focus:border-[#4DA8DA] transition-colors bg-gray-50 placeholder:text-gray-400"
-                placeholder="Enter password"
-                required
-                autoFocus
-              />
-            </div>
+          {/* Form section */}
+          <div className="px-8 py-7">
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Welcome back</h2>
+            <p className="text-sm text-gray-500 mb-6">Sign in to access the estimator</p>
 
-            {error && (
-              <div className="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-3 flex items-center gap-2">
-                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {error}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#4DA8DA]/30 focus:border-[#4DA8DA] transition-colors bg-gray-50 placeholder:text-gray-400"
+                  placeholder="Enter password"
+                  required
+                  autoFocus
+                />
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#4DA8DA] hover:bg-[#3d96c8] text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              {error && (
+                <div className="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-3 flex items-center gap-2">
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Signing in...
-                </span>
-              ) : 'Sign In'}
-            </button>
-          </form>
-        </div>
+                  {error}
+                </div>
+              )}
 
-        <p className="text-center text-xs text-white/25 mt-6">
-          Internal tool — authorized personnel only
-        </p>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#4DA8DA] hover:bg-[#3d96c8] text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Signing in...
+                  </span>
+                ) : 'Sign In'}
+              </button>
+            </form>
+
+            <p className="text-center text-xs text-gray-400 mt-6">
+              Authorized personnel only
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
