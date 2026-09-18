@@ -22,9 +22,6 @@ function extractEstimateJSON(text: string): Record<string, unknown> | null {
   }
 }
 
-function isEstimateJSON(text: string): boolean {
-  return extractEstimateJSON(text) !== null;
-}
 
 function buildReferenceContext(
   references: { jobType: string; pricingNotes: string; clientName?: string | null; total?: number | null }[],

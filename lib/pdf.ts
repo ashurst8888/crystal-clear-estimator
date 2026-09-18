@@ -42,7 +42,6 @@ const GRAY       = rgb(0.45, 0.45, 0.45);
 const LIGHT_GRAY = rgb(0.75, 0.75, 0.75);
 const RULE_GRAY  = rgb(0.82, 0.82, 0.82);
 const TITLE_GRAY = rgb(0.60, 0.60, 0.60); // "ESTIMATE" watermark color
-const WHITE      = rgb(1,    1,    1   );
 
 // ─── Page geometry ───────────────────────────────────────────────────────────
 const PW = 612;   // letter
@@ -256,7 +255,6 @@ export async function generateEstimatePDF(estimate: EstimateData): Promise<Uint8
   // ════════════════════════════════════════════════════════════════════
   // TABLE HEADER ROW
   // ════════════════════════════════════════════════════════════════════
-  const tableTop = ctx.y;
   const TH_SIZE = 9.5;
 
   txt(ctx, 'Description', ML, ctx.y, TH_SIZE, bold, BLACK);
