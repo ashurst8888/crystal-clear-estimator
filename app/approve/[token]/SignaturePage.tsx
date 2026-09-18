@@ -2,6 +2,26 @@
 
 import { useRef, useState, useEffect } from 'react';
 
+interface LineItem {
+  description: string;
+  details?: string;
+  total: number;
+}
+
+interface PaymentScheduleItem {
+  milestone: string;
+  amount: number;
+}
+
+interface EstimateJson {
+  line_items?: LineItem[];
+  payment_schedule?: PaymentScheduleItem[];
+  total?: number;
+  subtotal?: number;
+  discount?: number;
+  [key: string]: unknown;
+}
+
 interface SignaturePageProps {
   token: string;
   clientName: string;
@@ -10,9 +30,10 @@ interface SignaturePageProps {
   date: string;
   alreadySigned: boolean;
   signedAt?: string;
+  estimateJson?: EstimateJson;
 }
 
-export function SignaturePage({ token, clientName, invNum, total, date, alreadySigned, signedAt }: SignaturePageProps) {
+export function SignaturePage({ token, clientName, invNum, total, date, alreadySigned, signedAt, estimateJson }: SignaturePageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [drawing, setDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
@@ -170,6 +191,82 @@ export function SignaturePage({ token, clientName, invNum, total, date, alreadyS
               {invNum && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Estimate</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{invNum}</span></div>}
               {total && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: date ? '8px' : '0' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Total</span><span style={{ fontWeight: '700', fontSize: '18px', color: '#4DA8DA' }}>{total}</span></div>}
               {date && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Date</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{date}</span></div>}
+            </div>
+          )}
+
+          {/* Full line items table */}
+          {estimateJson && estimateJson.line_items && estimateJson.line_items.length > 0 && (
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ fontWeight: '700', fontSize: '15px', color: '#111827', margin: '0 0 12px 0' }}>
+                Estimate Details
+              </h3>
+              <div style={{ border: '1px solid #e5e7eb', borderRadius: '10px', overflow: 'hidden' }}>
+                {estimateJson.line_items.map((item, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      padding: '12px 14px',
+                      borderBottom: idx < (estimateJson.line_items?.length ?? 0) - 1 ? '1px solid #f3f4f6' : 'none',
+                      background: idx % 2 === 0 ? '#fff' : '#fafafa',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                      <span style={{ fontWeight: '600', fontSize: '14px', color: '#111827', flex: 1 }}>
+                        {item.description}
+                      </span>
+                      <span style={{ fontWeight: '700', fontSize: '14px', color: '#4DA8DA', whiteSpace: 'nowrap' }}>
+                        {item.total === 0 ? 'TBD' : `$${Number(item.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                      </span>
+                    </div>
+                    {item.details && (
+                      <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#6b7280', lineHeight: '1.5' }}>
+                        {item.details}
+                      </p>
+                    )}
+                  </div>
+                ))}
+
+                {/* Grand total */}
+                <div style={{ padding: '12px 14px', background: '#f0f9ff', borderTop: '2px solid #e5e7eb' }}>
+                  {estimateJson.subtotal !== undefined && estimateJson.subtotal !== estimateJson.total && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '13px', color: '#6b7280' }}>Subtotal</span>
+                      <span style={{ fontSize: '13px', color: '#374151' }}>
+                        ${Number(estimateJson.subtotal).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  )}
+                  {estimateJson.discount !== undefined && estimateJson.discount !== null && Number(estimateJson.discount) > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '13px', color: '#6b7280' }}>Discount</span>
+                      <span style={{ fontSize: '13px', color: '#ef4444' }}>
+                        -${Number(estimateJson.discount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ fontWeight: '700', fontSize: '15px', color: '#111827' }}>Total</span>
+                    <span style={{ fontWeight: '700', fontSize: '17px', color: '#4DA8DA' }}>{total}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment schedule */}
+              {estimateJson.payment_schedule && estimateJson.payment_schedule.length > 0 && (
+                <div style={{ marginTop: '14px', padding: '14px', background: '#f9fafb', borderRadius: '10px', border: '1px solid #e5e7eb' }}>
+                  <div style={{ fontWeight: '600', fontSize: '13px', color: '#374151', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Payment Schedule
+                  </div>
+                  {estimateJson.payment_schedule.map((ps, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: idx < (estimateJson.payment_schedule?.length ?? 0) - 1 ? '8px' : '0' }}>
+                      <span style={{ fontSize: '13px', color: '#6b7280' }}>{ps.milestone}</span>
+                      <span style={{ fontWeight: '600', fontSize: '13px', color: '#111827' }}>
+                        ${Number(ps.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

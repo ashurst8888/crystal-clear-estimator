@@ -33,6 +33,7 @@ export default async function ApprovePage({ params }: PageProps) {
       date={date}
       alreadySigned={!!approval.signedAt}
       signedAt={approval.signedAt?.toISOString()}
+      estimateJson={estimate}
     />
   );
 }

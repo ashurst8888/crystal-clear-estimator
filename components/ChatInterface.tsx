@@ -10,6 +10,14 @@ import {
 import Link from 'next/link';
 import { EstimatePreview } from './EstimatePreview';
 
+interface SavedClient {
+  id: string;
+  name: string;
+  address?: string | null;
+  cityStateZip?: string | null;
+  phone?: string | null;
+}
+
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -107,6 +115,8 @@ export function ChatInterface({
   const [loading, setLoading] = useState(false);
   const [speechAvailable, setSpeechAvailable] = useState(false);
   const [listening, setListening] = useState(false);
+  const [savedClients, setSavedClients] = useState<SavedClient[]>([]);
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -117,6 +127,22 @@ export function ChatInterface({
       setSpeechAvailable(true);
     }
   }, []);
+
+  useEffect(() => {
+    fetch('/api/clients')
+      .then((r) => r.json())
+      .then((data) => { if (data.clients) setSavedClients(data.clients); })
+      .catch(() => {});
+  }, []);
+
+  function handleSelectClient(client: SavedClient) {
+    const parts: string[] = [`Create an estimate for ${client.name}`];
+    if (client.address) parts.push(`at ${client.address}`);
+    if (client.cityStateZip) parts.push(client.cityStateZip);
+    if (client.phone) parts.push(`phone ${client.phone}`);
+    setShowClientDropdown(false);
+    sendMessage(parts.join(', '));
+  }
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -306,6 +332,45 @@ export function ChatInterface({
                 </button>
               ))}
             </div>
+
+            {savedClients.length > 0 && (
+              <div className="mt-5 w-full max-w-sm">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowClientDropdown((v) => !v)}
+                    className="w-full flex items-center justify-between text-sm font-medium text-[#4DA8DA] border border-[#4DA8DA] rounded-xl px-3 py-2.5 hover:bg-[#4DA8DA]/5 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Past Clients ({savedClients.length})
+                    </span>
+                    <svg className={`w-4 h-4 transition-transform ${showClientDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {showClientDropdown && (
+                    <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden max-h-56 overflow-y-auto">
+                      {savedClients.map((client) => (
+                        <button
+                          key={client.id}
+                          onClick={() => handleSelectClient(client)}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                        >
+                          <div className="font-medium text-gray-900 text-sm">{client.name}</div>
+                          {(client.address || client.cityStateZip) && (
+                            <div className="text-xs text-gray-400 mt-0.5 truncate">
+                              {[client.address, client.cityStateZip].filter(Boolean).join(', ')}
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

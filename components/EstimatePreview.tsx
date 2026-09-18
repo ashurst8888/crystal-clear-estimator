@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { EmailModal } from './EmailModal';
 
 interface LineItem {
@@ -64,9 +64,57 @@ function PriceSourceBadge({ source }: { source?: string }) {
   return null;
 }
 
+const STATUS_OPTIONS = [
+  { value: 'draft', label: 'Draft', color: '#9ca3af' },
+  { value: 'sent', label: 'Sent', color: '#3b82f6' },
+  { value: 'signed', label: 'Signed', color: '#22c55e' },
+  { value: 'in_progress', label: 'In Progress', color: '#eab308' },
+  { value: 'completed', label: 'Completed', color: '#16a34a' },
+  { value: 'declined', label: 'Declined', color: '#ef4444' },
+];
+
+function getConversationIdFromPath(): string | null {
+  if (typeof window === 'undefined') return null;
+  const parts = window.location.pathname.split('/');
+  const chatIdx = parts.indexOf('chat');
+  if (chatIdx !== -1 && parts[chatIdx + 1]) return parts[chatIdx + 1];
+  return null;
+}
+
 export function EstimatePreview({ estimate }: EstimatePreviewProps) {
   const [downloading, setDownloading] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [status, setStatus] = useState('draft');
+  const [savingStatus, setSavingStatus] = useState(false);
+
+  useEffect(() => {
+    const conversationId = getConversationIdFromPath();
+    if (!conversationId) return;
+    fetch(`/api/status?conversationId=${conversationId}`)
+      .then((r) => r.json())
+      .then((data) => { if (data.status) setStatus(data.status); })
+      .catch(() => {});
+  }, []);
+
+  async function handleStatusChange(newStatus: string) {
+    const conversationId = getConversationIdFromPath();
+    if (!conversationId) return;
+    setSavingStatus(true);
+    try {
+      await fetch('/api/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId, status: newStatus }),
+      });
+      setStatus(newStatus);
+    } catch {
+      // silently fail
+    } finally {
+      setSavingStatus(false);
+    }
+  }
+
+  const currentStatusOption = STATUS_OPTIONS.find((s) => s.value === status) ?? STATUS_OPTIONS[0];
 
   async function handleDownloadPDF() {
     setDownloading(true);
@@ -295,6 +343,26 @@ export function EstimatePreview({ estimate }: EstimatePreviewProps) {
         <p className="text-center text-xs text-gray-400 mt-3">
           Ask me to make changes in the chat below
         </p>
+        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-200">
+          <span className="text-sm text-gray-500 font-medium whitespace-nowrap">Status:</span>
+          <div className="flex items-center gap-2 flex-1">
+            <span
+              style={{ background: currentStatusOption.color }}
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+            />
+            <select
+              value={status}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              disabled={savingStatus}
+              className="flex-1 text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4DA8DA] disabled:opacity-50"
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            {savingStatus && <span className="text-xs text-gray-400">Saving...</span>}
+          </div>
+        </div>
       </div>
 
       {showEmailModal && (

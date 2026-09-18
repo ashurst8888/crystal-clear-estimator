@@ -144,6 +144,32 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Auto-save client if estimate has a client name
+    if (estimateData && estimateData.client_name) {
+      try {
+        const clientName = estimateData.client_name as string;
+        const clientAddress = (estimateData.client_address as string) ?? undefined;
+        const clientCityStateZip = (estimateData.client_city_state_zip as string) ?? undefined;
+        const clientPhone = (estimateData.client_phone as string) ?? undefined;
+        await prisma.client.upsert({
+          where: { name: clientName },
+          update: {
+            ...(clientAddress && { address: clientAddress }),
+            ...(clientCityStateZip && { cityStateZip: clientCityStateZip }),
+            ...(clientPhone && { phone: clientPhone }),
+          },
+          create: {
+            name: clientName,
+            address: clientAddress ?? null,
+            cityStateZip: clientCityStateZip ?? null,
+            phone: clientPhone ?? null,
+          },
+        });
+      } catch {
+        // Non-fatal — don't block the response
+      }
+    }
+
     const finalMessages: Message[] = [
       ...updatedMessages,
       { role: 'assistant', content: assistantResponse },
