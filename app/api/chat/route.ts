@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       if (!estimateData.invoice_number) {
         const allConversations = await prisma.conversation.findMany({ select: { lastEstimate: true } });
         const invoiceNumbers = allConversations
-          .map((c) => {
+          .map((c: { lastEstimate: unknown }) => {
             const le = c.lastEstimate as Record<string, unknown> | null;
             return le?.invoice_number;
           })
