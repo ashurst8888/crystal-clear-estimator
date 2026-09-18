@@ -5,7 +5,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Crystal Clear Estimator',
+  title: 'Crystal Clear Estimator | CC',
   description: 'Internal estimating tool for Crystal Clear Cleaning & Contracting',
   robots: 'noindex, nofollow',
 };
