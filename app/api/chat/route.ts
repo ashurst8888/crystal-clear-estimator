@@ -131,13 +131,14 @@ export async function POST(request: NextRequest) {
       // Auto-assign invoice number if not present
       if (!estimateData.invoice_number) {
         const allConversations = await prisma.conversation.findMany({ select: { lastEstimate: true } });
-        const invoiceNumbers = allConversations
-          .map((c: { lastEstimate: unknown }) => {
-            const le = c.lastEstimate as Record<string, unknown> | null;
-            return le?.invoice_number;
-          })
-          .filter((n): n is string => typeof n === 'string' && /^\d+$/.test(n))
-          .map(Number);
+        const invoiceNumbers: number[] = [];
+        for (const c of allConversations) {
+          const le = c.lastEstimate as Record<string, unknown> | null;
+          const n = le?.invoice_number;
+          if (typeof n === 'string' && /^\d+$/.test(n)) {
+            invoiceNumbers.push(Number(n));
+          }
+        }
         const maxInvoice = invoiceNumbers.length > 0 ? Math.max(...invoiceNumbers) : 999;
         estimateData.invoice_number = String(maxInvoice + 1);
       }
