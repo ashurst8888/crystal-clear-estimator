@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Header bar
     sigPage.drawRectangle({ x: 0, y: height - 60, width, height: 60, color: BLUE });
     sigPage.drawText('SIGNATURE & AUDIT TRAIL', { x: 36, y: height - 38, size: 16, font: boldFont, color: rgb(1, 1, 1) });
-    sigPage.drawText('Crystal Clear Cleaning & Contracting', { x: 36, y: height - 54, size: 9, font, color: rgb(1, 1, 1, 0.85) });
+    sigPage.drawText('Crystal Clear Cleaning & Contracting', { x: 36, y: height - 54, size: 9, font, color: rgb(0.95, 0.95, 0.95) });
 
     let y = height - 90;
 
