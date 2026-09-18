@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     // Generate approval token and save to DB
     const token = crypto.randomBytes(32).toString('hex');
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
     const approvalLink = `${appUrl}/approve/${token}`;
 
     await prisma.estimateApproval.create({

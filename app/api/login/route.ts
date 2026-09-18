@@ -23,6 +23,6 @@ export async function POST(request: NextRequest) {
 
 // GET /api/login — logout
 export async function GET() {
-  const response = NextResponse.redirect(new URL('/login', process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'));
+  const response = NextResponse.redirect(new URL('/login', process.env.APP_URL || 'http://localhost:3000'));
   return clearAuthCookie(response);
 }

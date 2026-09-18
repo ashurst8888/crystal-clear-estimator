@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
       const fromEmail = process.env.FROM_EMAIL;
       if (resendApiKey && fromEmail) {
         const resend = new Resend(resendApiKey);
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const appUrl = process.env.APP_URL || 'http://localhost:3000';
         const signedPdfUrl = `${appUrl}/api/signed-pdf?id=${approval.id}`;
         const notifTotal = estimate.total
           ? `$${Number(estimate.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
