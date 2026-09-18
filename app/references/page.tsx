@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
+import { AppLayout } from '@/components/AppLayout';
 
 interface Reference {
   id: string;
@@ -110,28 +110,12 @@ export default function ReferencesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4">
-        <Link
-          href="/chat"
-          className="text-[#4DA8DA] hover:text-[#3d96c8] flex items-center gap-1.5 text-sm"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Chat
-        </Link>
-        <div className="h-5 w-px bg-gray-300" />
-        <h1 className="font-bold text-gray-900">Reference Estimates Library</h1>
-        <div className="ml-auto">
-          <Link href="/history" className="text-gray-500 hover:text-gray-700 text-sm">
-            History
-          </Link>
+    <AppLayout>
+      <div className="p-6 max-w-4xl mx-auto space-y-6">
+        <div className="mb-2">
+          <h1 className="text-2xl font-bold text-gray-900">References</h1>
+          <p className="text-sm text-gray-500 mt-1">Past estimates used to inform AI pricing suggestions</p>
         </div>
-      </header>
-
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Upload Section */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="font-semibold text-gray-900 mb-3">Upload New Reference Estimate</h2>
@@ -285,6 +269,6 @@ export default function ReferencesPage() {
           )}
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }
