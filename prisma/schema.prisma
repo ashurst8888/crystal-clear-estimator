@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Conversation {
+  id           String   @id @default(uuid())
+  messages     Json
+  lastEstimate Json?
+  clientName   String?
+  total        Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ReferenceEstimate {
+  id               String   @id @default(uuid())
+  jobType          String
+  clientName       String?
+  extractedJson    Json
+  pricingNotes     String   @db.Text
+  total            Float?
+  originalFilename String?
+  createdAt        DateTime @default(now())
+}
+
+model EstimateApproval {
+  id               String    @id @default(uuid())
+  token            String    @unique
+  clientName       String?
+  clientEmail      String
+  estimateJson     Json
+  envelopeId       String?
+
+  // Signature evidence
+  signature        String?   @db.Text
+  signedAt         DateTime?
+  ipAddress        String?
+  userAgent        String?
+  consentGiven     Boolean   @default(false)
+  consentTimestamp DateTime?
+  signedPdfHash    String?
+  signedPdfBytes   String?   @db.Text
+
+  approvedAt       DateTime?
+  createdAt        DateTime  @default(now())
+}
