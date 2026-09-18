@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
 
     // Generate the base estimate PDF
     const estimate = approval.estimateJson as Record<string, unknown>;
-    const basePdfBytes = await generateEstimatePDF(estimate);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const basePdfBytes = await generateEstimatePDF(estimate as any);
 
     // Load it and append a signature evidence page
     const pdfDoc = await PDFDocument.load(basePdfBytes);
