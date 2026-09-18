@@ -142,7 +142,7 @@ export function SignaturePage({ token, clientName, invNum, total, date, alreadyS
     return (
       <div style={{ fontFamily: 'Arial, sans-serif', minHeight: '100vh', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', maxWidth: '480px', width: '100%', overflow: 'hidden' }}>
-          <div style={{ background: '#4DA8DA', padding: '28px 32px', textAlign: 'center' }}>
+          <div style={{ background: '#2563eb', padding: '28px 32px', textAlign: 'center' }}>
             <div style={{ fontSize: '48px', marginBottom: '8px' }}>✅</div>
             <h1 style={{ color: 'white', margin: 0, fontSize: '24px', fontWeight: 'bold' }}>
               {alreadySigned ? 'Already Signed' : 'Estimate Signed!'}
@@ -161,13 +161,13 @@ export function SignaturePage({ token, clientName, invNum, total, date, alreadyS
               <div style={{ background: '#f9fafb', borderRadius: '10px', padding: '16px', margin: '24px 0', textAlign: 'left' }}>
                 {clientName && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Client</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{clientName}</span></div>}
                 {invNum && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Estimate</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{invNum}</span></div>}
-                {total && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: date ? '8px' : '0' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Total</span><span style={{ fontWeight: '700', fontSize: '16px', color: '#4DA8DA' }}>{total}</span></div>}
+                {total && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: date ? '8px' : '0' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Total</span><span style={{ fontWeight: '700', fontSize: '16px', color: '#2563eb' }}>{total}</span></div>}
                 {date && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Date</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{date}</span></div>}
               </div>
             )}
             <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: 0 }}>
               Questions? Call us at{' '}
-              <a href="tel:5136148080" style={{ color: '#4DA8DA', fontWeight: '600', textDecoration: 'none' }}>(513) 614-8080</a>
+              <a href="tel:5136148080" style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>(513) 614-8080</a>
             </p>
           </div>
         </div>
@@ -178,7 +178,7 @@ export function SignaturePage({ token, clientName, invNum, total, date, alreadyS
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', minHeight: '100vh', background: '#f3f4f6', padding: '24px' }}>
       <div style={{ maxWidth: '480px', margin: '0 auto' }}>
-        <div style={{ background: '#4DA8DA', borderRadius: '16px 16px 0 0', padding: '24px 28px' }}>
+        <div style={{ background: '#2563eb', borderRadius: '16px 16px 0 0', padding: '24px 28px' }}>
           <h1 style={{ color: 'white', margin: 0, fontSize: '20px', fontWeight: 'bold' }}>Crystal Clear Cleaning &amp; Contracting</h1>
           <p style={{ color: 'rgba(255,255,255,0.85)', margin: '4px 0 0', fontSize: '14px' }}>Please review and sign your estimate</p>
         </div>
@@ -189,7 +189,7 @@ export function SignaturePage({ token, clientName, invNum, total, date, alreadyS
             <div style={{ background: '#f9fafb', borderRadius: '10px', padding: '16px', marginBottom: '24px' }}>
               {clientName && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Client</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{clientName}</span></div>}
               {invNum && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Estimate</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{invNum}</span></div>}
-              {total && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: date ? '8px' : '0' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Total</span><span style={{ fontWeight: '700', fontSize: '18px', color: '#4DA8DA' }}>{total}</span></div>}
+              {total && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: date ? '8px' : '0' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Total</span><span style={{ fontWeight: '700', fontSize: '18px', color: '#2563eb' }}>{total}</span></div>}
               {date && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#6b7280', fontSize: '14px' }}>Date</span><span style={{ fontWeight: '600', fontSize: '14px' }}>{date}</span></div>}
             </div>
           )}
@@ -214,7 +214,7 @@ export function SignaturePage({ token, clientName, invNum, total, date, alreadyS
                       <span style={{ fontWeight: '600', fontSize: '14px', color: '#111827', flex: 1 }}>
                         {item.description}
                       </span>
-                      <span style={{ fontWeight: '700', fontSize: '14px', color: '#4DA8DA', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontWeight: '700', fontSize: '14px', color: '#2563eb', whiteSpace: 'nowrap' }}>
                         {item.total === 0 ? 'TBD' : `$${Number(item.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
                       </span>
                     </div>
@@ -246,7 +246,7 @@ export function SignaturePage({ token, clientName, invNum, total, date, alreadyS
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ fontWeight: '700', fontSize: '15px', color: '#111827' }}>Total</span>
-                    <span style={{ fontWeight: '700', fontSize: '17px', color: '#4DA8DA' }}>{total}</span>
+                    <span style={{ fontWeight: '700', fontSize: '17px', color: '#2563eb' }}>{total}</span>
                   </div>
                 </div>
               </div>
@@ -271,12 +271,12 @@ export function SignaturePage({ token, clientName, invNum, total, date, alreadyS
           )}
 
           {/* Consent checkbox */}
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer', marginBottom: '24px', padding: '14px', background: consentGiven ? '#f0f9ff' : '#f9fafb', borderRadius: '10px', border: `1.5px solid ${consentGiven ? '#4DA8DA' : '#e5e7eb'}`, transition: 'all 0.15s' }}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer', marginBottom: '24px', padding: '14px', background: consentGiven ? '#f0f9ff' : '#f9fafb', borderRadius: '10px', border: `1.5px solid ${consentGiven ? '#2563eb' : '#e5e7eb'}`, transition: 'all 0.15s' }}>
             <input
               type="checkbox"
               checked={consentGiven}
               onChange={e => handleConsentChange(e.target.checked)}
-              style={{ marginTop: '2px', width: '18px', height: '18px', accentColor: '#4DA8DA', flexShrink: 0 }}
+              style={{ marginTop: '2px', width: '18px', height: '18px', accentColor: '#2563eb', flexShrink: 0 }}
             />
             <span style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
               I agree to sign this estimate electronically and agree to its terms.
@@ -287,7 +287,7 @@ export function SignaturePage({ token, clientName, invNum, total, date, alreadyS
           <p style={{ fontWeight: '600', color: '#111827', marginTop: 0, marginBottom: '8px', fontSize: '15px' }}>
             Sign below with your finger
           </p>
-          <div style={{ border: `2px solid ${hasSignature ? '#4DA8DA' : '#e5e7eb'}`, borderRadius: '10px', overflow: 'hidden', background: '#fafafa', position: 'relative', transition: 'border-color 0.15s' }}>
+          <div style={{ border: `2px solid ${hasSignature ? '#2563eb' : '#e5e7eb'}`, borderRadius: '10px', overflow: 'hidden', background: '#fafafa', position: 'relative', transition: 'border-color 0.15s' }}>
             <canvas
               ref={canvasRef}
               width={860}
@@ -323,7 +323,7 @@ export function SignaturePage({ token, clientName, invNum, total, date, alreadyS
             disabled={!canSubmit}
             style={{
               display: 'block', width: '100%', marginTop: '20px',
-              background: canSubmit ? '#4DA8DA' : '#d1d5db',
+              background: canSubmit ? '#2563eb' : '#d1d5db',
               color: 'white', border: 'none', borderRadius: '10px',
               padding: '16px', fontSize: '17px', fontWeight: 'bold',
               cursor: canSubmit ? 'pointer' : 'not-allowed', transition: 'background 0.2s',

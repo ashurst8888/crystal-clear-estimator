@@ -92,7 +92,7 @@ export function EmailModal({ estimate, onClose }: EmailModalProps) {
             </p>
             <button
               onClick={onClose}
-              className="mt-5 bg-[#4DA8DA] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#3d96c8] transition-colors"
+              className="mt-5 bg-[#2563eb] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#1d4ed8] transition-colors"
             >
               Done
             </button>
@@ -109,7 +109,7 @@ export function EmailModal({ estimate, onClose }: EmailModalProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="customer@example.com"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#4DA8DA] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent"
                   autoFocus
                 />
               </div>
@@ -122,7 +122,7 @@ export function EmailModal({ estimate, onClose }: EmailModalProps) {
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Any additional notes for the customer..."
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#4DA8DA] focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent resize-none"
                 />
               </div>
 
@@ -143,7 +143,7 @@ export function EmailModal({ estimate, onClose }: EmailModalProps) {
               <button
                 onClick={handleSend}
                 disabled={loading}
-                className="flex-1 bg-[#4DA8DA] text-white py-3 rounded-lg font-medium hover:bg-[#3d96c8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-[#2563eb] text-white py-3 rounded-lg font-medium hover:bg-[#1d4ed8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Sending...' : 'Send Estimate'}
               </button>

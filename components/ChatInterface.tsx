@@ -32,7 +32,7 @@ interface ChatInterfaceProps {
 function TypingIndicator() {
   return (
     <div className="flex items-end gap-2 mb-4">
-      <div className="w-8 h-8 rounded-full bg-[#4DA8DA] flex items-center justify-center shrink-0 text-white text-xs font-bold">
+      <div className="w-8 h-8 rounded-full bg-[#2563eb] flex items-center justify-center shrink-0 text-white text-xs font-bold">
         CC
       </div>
       <div className="bg-gray-100 rounded-2xl rounded-bl-sm px-4 py-3">
@@ -70,7 +70,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
     return (
       <div className="mb-4 w-full">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-7 h-7 rounded-full bg-[#4DA8DA] flex items-center justify-center text-white text-xs font-bold">
+          <div className="w-7 h-7 rounded-full bg-[#2563eb] flex items-center justify-center text-white text-xs font-bold">
             CC
           </div>
           <span className="text-xs text-gray-500">Estimate ready</span>
@@ -83,14 +83,14 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   return (
     <div className={`flex items-end gap-2 mb-4 ${isUser ? 'flex-row-reverse' : ''}`}>
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-[#4DA8DA] flex items-center justify-center shrink-0 text-white text-xs font-bold">
+        <div className="w-8 h-8 rounded-full bg-[#2563eb] flex items-center justify-center shrink-0 text-white text-xs font-bold">
           CC
         </div>
       )}
       <div
         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
           isUser
-            ? 'bg-[#4DA8DA] text-white rounded-br-sm'
+            ? 'bg-[#2563eb] text-white rounded-br-sm'
             : 'bg-gray-100 text-gray-900 rounded-bl-sm'
         }`}
       >
@@ -265,7 +265,7 @@ export function ChatInterface({
   return (
     <div className="flex h-screen overflow-hidden bg-[#F4F6F9]">
       {/* Sidebar */}
-      <aside className="hidden lg:flex flex-col w-60 bg-[#0d1f35] text-white shrink-0">
+      <aside className="hidden lg:flex flex-col w-60 bg-[#111827] text-white shrink-0">
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -282,7 +282,7 @@ export function ChatInterface({
         <div className="px-4 py-4">
           <Link
             href="/chat"
-            className="flex items-center justify-center gap-2 w-full bg-[#4DA8DA] hover:bg-[#3d96c8] text-white text-sm font-semibold py-2.5 px-4 rounded-xl transition-colors"
+            className="flex items-center justify-center gap-2 w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold py-2.5 px-4 rounded-xl transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -320,7 +320,7 @@ export function ChatInterface({
           {/* Back to Dashboard — always visible */}
           <Link
             href="/dashboard"
-            className="flex items-center gap-1.5 text-gray-500 hover:text-[#4DA8DA] text-sm font-medium transition-colors shrink-0"
+            className="flex items-center gap-1.5 text-gray-500 hover:text-[#2563eb] text-sm font-medium transition-colors shrink-0"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -347,7 +347,7 @@ export function ChatInterface({
             </Link>
             <Link
               href="/chat"
-              className="bg-[#4DA8DA] hover:bg-[#3d96c8] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+              className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
             >
               + New
             </Link>
@@ -358,8 +358,8 @@ export function ChatInterface({
       <div className="flex-1 overflow-y-auto px-4 py-4 bg-white">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#4DA8DA]/10 flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-[#4DA8DA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 rounded-2xl bg-[#2563eb]/10 flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-[#2563eb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
@@ -391,7 +391,7 @@ export function ChatInterface({
                 <div className="relative">
                   <button
                     onClick={() => setShowClientDropdown((v) => !v)}
-                    className="w-full flex items-center justify-between text-sm font-medium text-[#4DA8DA] border border-[#4DA8DA] rounded-xl px-3 py-2.5 hover:bg-[#4DA8DA]/5 transition-colors"
+                    className="w-full flex items-center justify-between text-sm font-medium text-[#2563eb] border border-[#2563eb] rounded-xl px-3 py-2.5 hover:bg-[#2563eb]/5 transition-colors"
                   >
                     <span className="flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -457,7 +457,7 @@ export function ChatInterface({
               onKeyDown={handleKeyDown}
               placeholder="Describe the job or ask a question..."
               rows={1}
-              className="w-full resize-none border border-gray-300 rounded-2xl px-4 py-3 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-[#4DA8DA] focus:border-transparent max-h-32 overflow-y-auto"
+              className="w-full resize-none border border-gray-300 rounded-2xl px-4 py-3 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent max-h-32 overflow-y-auto"
               style={{ minHeight: '48px' }}
               disabled={loading}
             />
@@ -471,7 +471,7 @@ export function ChatInterface({
                   ? 'text-gray-300 cursor-not-allowed'
                   : listening
                   ? 'text-red-500 bg-red-50'
-                  : 'text-gray-400 hover:text-[#4DA8DA] hover:bg-[#4DA8DA]/10'
+                  : 'text-gray-400 hover:text-[#2563eb] hover:bg-[#2563eb]/10'
               }`}
               aria-label={listening ? 'Stop recording' : 'Start voice input'}
             >
@@ -489,7 +489,7 @@ export function ChatInterface({
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="w-12 h-12 bg-[#4DA8DA] hover:bg-[#3d96c8] disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl flex items-center justify-center transition-colors shrink-0"
+            className="w-12 h-12 bg-[#2563eb] hover:bg-[#1d4ed8] disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl flex items-center justify-center transition-colors shrink-0"
             aria-label="Send message"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

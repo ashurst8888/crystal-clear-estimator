@@ -126,8 +126,8 @@ export default function ReferencesPage() {
           <div
             className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
               dragOver
-                ? 'border-[#4DA8DA] bg-[#4DA8DA]/5'
-                : 'border-gray-300 hover:border-[#4DA8DA] hover:bg-gray-50'
+                ? 'border-[#2563eb] bg-[#2563eb]/5'
+                : 'border-gray-300 hover:border-[#2563eb] hover:bg-gray-50'
             }`}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => {
@@ -146,7 +146,7 @@ export default function ReferencesPage() {
             />
             {uploading ? (
               <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-2 border-[#4DA8DA] border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-[#2563eb] border-t-transparent rounded-full animate-spin" />
                 <p className="text-sm text-gray-600">Uploading and processing...</p>
               </div>
             ) : (
@@ -213,7 +213,7 @@ export default function ReferencesPage() {
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         <span className="font-semibold text-gray-900 text-sm">{ref.jobType}</span>
                         {isSeeded(ref) && (
-                          <span className="bg-[#4DA8DA]/10 text-[#4DA8DA] text-xs px-1.5 py-0.5 rounded font-medium">
+                          <span className="bg-[#2563eb]/10 text-[#2563eb] text-xs px-1.5 py-0.5 rounded font-medium">
                             Seeded
                           </span>
                         )}

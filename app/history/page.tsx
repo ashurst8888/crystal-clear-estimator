@@ -73,7 +73,7 @@ export default function HistoryPage() {
           </div>
           <Link
             href="/chat"
-            className="inline-flex items-center gap-2 bg-[#4DA8DA] hover:bg-[#3d96c8] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -93,7 +93,7 @@ export default function HistoryPage() {
               placeholder="Search by client name or invoice #..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4DA8DA]/30 focus:border-[#4DA8DA]"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb]"
             />
           </div>
         )}
@@ -116,7 +116,7 @@ export default function HistoryPage() {
             </div>
             <h2 className="text-lg font-semibold text-gray-800 mb-2">No estimates yet</h2>
             <p className="text-sm text-gray-400 mb-5">Start a conversation to create your first estimate.</p>
-            <Link href="/chat" className="inline-flex items-center gap-2 bg-[#4DA8DA] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#3d96c8] transition-colors">
+            <Link href="/chat" className="inline-flex items-center gap-2 bg-[#2563eb] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#1d4ed8] transition-colors">
               Create Estimate
             </Link>
           </div>
@@ -132,8 +132,8 @@ export default function HistoryPage() {
                 {filtered.map((entry) => (
                   <div key={entry.id} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50/60 transition-colors group">
                     {/* Left: avatar */}
-                    <div className="w-9 h-9 rounded-xl bg-[#4DA8DA]/10 flex items-center justify-center shrink-0">
-                      <span className="text-[#4DA8DA] font-bold text-sm">
+                    <div className="w-9 h-9 rounded-xl bg-[#2563eb]/10 flex items-center justify-center shrink-0">
+                      <span className="text-[#2563eb] font-bold text-sm">
                         {(entry.clientName || 'U').charAt(0).toUpperCase()}
                       </span>
                     </div>
@@ -148,7 +148,7 @@ export default function HistoryPage() {
                           </span>
                         )}
                         {entry.total !== null && entry.total !== undefined && (
-                          <span className="text-sm font-semibold text-[#4DA8DA]">{formatCurrency(entry.total)}</span>
+                          <span className="text-sm font-semibold text-[#2563eb]">{formatCurrency(entry.total)}</span>
                         )}
                       </div>
                       {entry.summary && (
@@ -163,7 +163,7 @@ export default function HistoryPage() {
                     <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Link
                         href={`/chat/${entry.id}`}
-                        className="text-xs font-semibold text-[#4DA8DA] border border-[#4DA8DA]/30 rounded-lg px-3 py-1.5 hover:bg-[#4DA8DA]/5 transition-colors"
+                        className="text-xs font-semibold text-[#2563eb] border border-[#2563eb]/30 rounded-lg px-3 py-1.5 hover:bg-[#2563eb]/5 transition-colors"
                       >
                         Open
                       </Link>
@@ -178,7 +178,7 @@ export default function HistoryPage() {
                       </button>
                     </div>
                     {/* Always-visible open link for mobile */}
-                    <Link href={`/chat/${entry.id}`} className="lg:hidden text-xs font-semibold text-[#4DA8DA]">
+                    <Link href={`/chat/${entry.id}`} className="lg:hidden text-xs font-semibold text-[#2563eb]">
                       Open →
                     </Link>
                   </div>

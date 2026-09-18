@@ -150,7 +150,7 @@ export function EstimatePreview({ estimate }: EstimatePreviewProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="bg-[#4DA8DA] px-5 py-4">
+      <div className="bg-[#2563eb] px-5 py-4">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="text-white/80 text-xs font-medium uppercase tracking-wide mb-0.5">
@@ -287,7 +287,7 @@ export function EstimatePreview({ estimate }: EstimatePreviewProps) {
             )}
             <div className="flex justify-between text-base font-bold text-gray-900 pt-1.5 border-t border-gray-200">
               <span>Total</span>
-              <span className="text-[#4DA8DA]">{formatCurrency(total)}</span>
+              <span className="text-[#2563eb]">{formatCurrency(total)}</span>
             </div>
           </div>
         </div>
@@ -323,7 +323,7 @@ export function EstimatePreview({ estimate }: EstimatePreviewProps) {
           <button
             onClick={handleDownloadPDF}
             disabled={downloading}
-            className="flex-1 flex items-center justify-center gap-2 bg-[#4DA8DA] hover:bg-[#3d96c8] text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -354,7 +354,7 @@ export function EstimatePreview({ estimate }: EstimatePreviewProps) {
               value={status}
               onChange={(e) => handleStatusChange(e.target.value)}
               disabled={savingStatus}
-              className="flex-1 text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#4DA8DA] disabled:opacity-50"
+              className="flex-1 text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563eb] disabled:opacity-50"
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>

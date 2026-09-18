@@ -39,12 +39,12 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1f35] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#111827] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Blue header band with logo */}
-          <div className="bg-[#4DA8DA] px-8 py-8 flex flex-col items-center">
+          <div className="bg-[#2563eb] px-8 py-8 flex flex-col items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.png"
@@ -71,7 +71,7 @@ function LoginForm() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#4DA8DA]/30 focus:border-[#4DA8DA] transition-colors bg-gray-50 placeholder:text-gray-400"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb] transition-colors bg-gray-50 placeholder:text-gray-400"
                   placeholder="Enter password"
                   required
                   autoFocus
@@ -90,7 +90,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#4DA8DA] hover:bg-[#3d96c8] text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -117,7 +117,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0d1f35] flex items-center justify-center">
+      <div className="min-h-screen bg-[#111827] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
       </div>
     }>

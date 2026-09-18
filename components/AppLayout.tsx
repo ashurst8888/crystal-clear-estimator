@@ -61,7 +61,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <aside
         className={`
           fixed inset-y-0 left-0 z-30 w-60 flex flex-col
-          bg-[#0d1f35] text-white
+          bg-[#111827] text-white
           transform transition-transform duration-200 ease-in-out
           lg:relative lg:translate-x-0 lg:flex
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -84,7 +84,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <Link
             href="/chat"
             onClick={() => setMobileOpen(false)}
-            className="flex items-center justify-center gap-2 w-full bg-[#4DA8DA] hover:bg-[#3d96c8] text-white text-sm font-semibold py-2.5 px-4 rounded-xl transition-colors"
+            className="flex items-center justify-center gap-2 w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold py-2.5 px-4 rounded-xl transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -110,7 +110,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   }
                 `}
               >
-                <span className={isActive ? 'text-[#4DA8DA]' : 'text-white/50'}>
+                <span className={isActive ? 'text-[#2563eb]' : 'text-white/50'}>
                   {item.icon}
                 </span>
                 {item.label}
@@ -130,7 +130,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile top bar */}
-        <header className="lg:hidden flex items-center gap-3 bg-[#0d1f35] text-white px-4 py-3 shrink-0">
+        <header className="lg:hidden flex items-center gap-3 bg-[#111827] text-white px-4 py-3 shrink-0">
           <button
             onClick={() => setMobileOpen(true)}
             className="text-white/70 hover:text-white"
@@ -144,7 +144,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <img src="/logo.png" alt="Crystal Clear" className="h-7 w-auto" />
             <span className="font-semibold text-sm">Crystal Clear Estimator</span>
           </div>
-          <Link href="/chat" className="ml-auto bg-[#4DA8DA] text-white text-xs font-semibold px-3 py-1.5 rounded-lg">
+          <Link href="/chat" className="ml-auto bg-[#2563eb] text-white text-xs font-semibold px-3 py-1.5 rounded-lg">
             + New
           </Link>
         </header>

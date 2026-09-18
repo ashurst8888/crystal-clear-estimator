@@ -115,7 +115,7 @@ export default function ApprovalsPage() {
                             <div className="text-xs text-gray-400 mt-0.5">Sent {formatDateTime(a.createdAt)}</div>
                           </div>
                           <div className="shrink-0 flex items-center gap-3">
-                            {total && <span className="text-sm font-semibold text-[#4DA8DA]">{total}</span>}
+                            {total && <span className="text-sm font-semibold text-[#2563eb]">{total}</span>}
                             <button
                               onClick={() => handleDelete(a.id)}
                               className="text-xs text-red-400 hover:text-red-600 border border-red-200 rounded-lg px-2.5 py-1.5 hover:bg-red-50 transition-colors"
@@ -165,11 +165,11 @@ export default function ApprovalsPage() {
                             <div className="text-xs text-emerald-600 mt-0.5 font-medium">{signedDate}</div>
                           </div>
                           <div className="shrink-0 flex items-center gap-2">
-                            {total && <span className="text-sm font-semibold text-[#4DA8DA]">{total}</span>}
+                            {total && <span className="text-sm font-semibold text-[#2563eb]">{total}</span>}
                             {a.signedPdfBytes && (
                               <a
                                 href={`/api/signed-pdf?id=${a.id}`}
-                                className="text-xs font-semibold bg-[#4DA8DA] hover:bg-[#3d96c8] text-white px-3 py-1.5 rounded-lg transition-colors"
+                                className="text-xs font-semibold bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-3 py-1.5 rounded-lg transition-colors"
                               >
                                 PDF
                               </a>
