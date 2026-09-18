@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
@@ -71,7 +70,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
           <div className="w-9 h-9 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center shrink-0">
-            <Image src="/logo.png" alt="Crystal Clear" width={36} height={36} className="w-9 h-9 object-contain" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Crystal Clear" className="w-9 h-9 object-contain" />
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-sm leading-tight text-white truncate">Crystal Clear</div>
@@ -106,7 +106,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                   ${isActive
                     ? 'bg-white/15 text-white'
-                    : 'text-white/60 hover:text-white hover:bg-white/8'
+                    : 'text-white/60 hover:text-white hover:bg-white/10'
                   }
                 `}
               >
@@ -140,7 +140,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </svg>
           </button>
           <div className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Crystal Clear" width={28} height={28} className="h-7 w-auto" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Crystal Clear" className="h-7 w-auto" />
             <span className="font-semibold text-sm">Crystal Clear Estimator</span>
           </div>
           <Link href="/chat" className="ml-auto bg-[#4DA8DA] text-white text-xs font-semibold px-3 py-1.5 rounded-lg">

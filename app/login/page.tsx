@@ -3,7 +3,6 @@
 import { useState, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import Image from 'next/image';
 
 function LoginForm() {
   const router = useRouter();
@@ -45,13 +44,8 @@ function LoginForm() {
         {/* Logo card */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 mb-5 overflow-hidden">
-            <Image
-              src="/logo.png"
-              alt="Crystal Clear"
-              width={80}
-              height={80}
-              className="w-20 h-20 object-contain"
-            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Crystal Clear" className="w-20 h-20 object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-white">Crystal Clear</h1>
           <p className="text-white/50 text-sm mt-1">Cleaning & Contracting · Estimator</p>

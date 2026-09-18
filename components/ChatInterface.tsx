@@ -115,6 +115,7 @@ export function ChatInterface({
   const [loading, setLoading] = useState(false);
   const [speechAvailable, setSpeechAvailable] = useState(false);
   const [listening, setListening] = useState(false);
+  const [speechError, setSpeechError] = useState('');
   const [savedClients, setSavedClients] = useState<SavedClient[]>([]);
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -123,9 +124,7 @@ export function ChatInterface({
 
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SR) {
-      setSpeechAvailable(true);
-    }
+    setSpeechAvailable(!!SR);
   }, []);
 
   useEffect(() => {
@@ -245,8 +244,17 @@ export function ChatInterface({
     recognition.onend = () => {
       setListening(false);
     };
-    recognition.onerror = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onerror = (event: any) => {
       setListening(false);
+      if (event.error === 'not-allowed') {
+        setSpeechError('Microphone access denied. Allow mic access in your browser settings.');
+      } else if (event.error === 'no-speech') {
+        setSpeechError('No speech detected. Try again.');
+      } else {
+        setSpeechError('Voice input failed. Try again.');
+      }
+      setTimeout(() => setSpeechError(''), 4000);
     };
 
     recognitionRef.current = recognition;
@@ -293,7 +301,7 @@ export function ChatInterface({
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/8 transition-all"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
             >
               <span className="text-white/50">{item.icon}</span>
               {item.label}
@@ -326,8 +334,14 @@ export function ChatInterface({
           </div>
           <div className="flex items-center gap-2">
             <Link
-              href="/history"
+              href="/dashboard"
               className="text-gray-500 hover:text-gray-700 text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/history"
+              className="text-gray-500 hover:text-gray-700 text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors hidden lg:block"
             >
               History
             </Link>
@@ -447,22 +461,30 @@ export function ChatInterface({
               style={{ minHeight: '48px' }}
               disabled={loading}
             />
-            {speechAvailable && (
-              <button
-                type="button"
-                onClick={toggleListening}
-                className={`absolute right-3 bottom-3 p-1 rounded-full transition-colors ${
-                  listening
-                    ? 'text-red-500 bg-red-50'
-                    : 'text-gray-400 hover:text-gray-600'
-                }`}
-                aria-label={listening ? 'Stop recording' : 'Start voice input'}
-              >
-                <svg className="w-5 h-5" fill={listening ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+            <button
+              type="button"
+              onClick={speechAvailable ? toggleListening : undefined}
+              disabled={!speechAvailable}
+              title={speechAvailable ? (listening ? 'Stop recording' : 'Voice input') : 'Voice input not supported in this browser'}
+              className={`absolute right-3 bottom-3 p-1.5 rounded-full transition-colors ${
+                !speechAvailable
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : listening
+                  ? 'text-red-500 bg-red-50'
+                  : 'text-gray-400 hover:text-[#4DA8DA] hover:bg-[#4DA8DA]/10'
+              }`}
+              aria-label={listening ? 'Stop recording' : 'Start voice input'}
+            >
+              {listening ? (
+                <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3zm-1 19.93V22h2v-1.07A8.001 8.001 0 0020 13h-2a6 6 0 01-12 0H4a8.001 8.001 0 007 7.93z"/>
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
-              </button>
-            )}
+              )}
+            </button>
           </div>
           <button
             type="submit"
@@ -475,9 +497,14 @@ export function ChatInterface({
             </svg>
           </button>
         </form>
-        <p className="text-center text-xs text-gray-400 mt-2">
-          Press Enter to send · Shift+Enter for new line
-        </p>
+        {speechError && (
+          <p className="text-center text-xs text-red-500 mt-2">{speechError}</p>
+        )}
+        {!speechError && (
+          <p className="text-center text-xs text-gray-400 mt-2">
+            Press Enter to send · Shift+Enter for new line
+          </p>
+        )}
       </div>
       </div>{/* end chat column */}
     </div>
