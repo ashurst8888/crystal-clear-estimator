@@ -13,12 +13,20 @@ interface Client {
   createdAt: string;
 }
 
+const EMPTY_FORM = { name: '', address: '', cityStateZip: '', phone: '', email: '' };
+
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [search, setSearch] = useState('');
+
+  // Add client modal
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const load = useCallback(async () => {
     try {
@@ -67,6 +75,48 @@ export default function ClientsPage() {
     finally { setDeleting(false); }
   }
 
+  async function handleAddClient(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) { setFormError('Name is required.'); return; }
+    setSaving(true);
+    setFormError('');
+    try {
+      const res = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          address: form.address.trim() || null,
+          cityStateZip: form.cityStateZip.trim() || null,
+          phone: form.phone.trim() || null,
+          email: form.email.trim() || null,
+        }),
+      });
+      const data = await res.json();
+      if (data.client) {
+        setClients(prev => {
+          const exists = prev.find(c => c.id === data.client.id);
+          if (exists) return prev.map(c => c.id === data.client.id ? data.client : c);
+          return [data.client, ...prev];
+        });
+        setShowModal(false);
+        setForm(EMPTY_FORM);
+      } else {
+        setFormError(data.error || 'Failed to save client.');
+      }
+    } catch {
+      setFormError('Something went wrong. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function openModal() {
+    setForm(EMPTY_FORM);
+    setFormError('');
+    setShowModal(true);
+  }
+
   const allSelected = filtered.length > 0 && selected.size === filtered.length;
 
   return (
@@ -75,20 +125,31 @@ export default function ClientsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
-            <p className="text-sm text-gray-500 mt-1">All saved clients from generated estimates</p>
+            <p className="text-sm text-gray-500 mt-1">Saved clients — select one when creating a quote to auto-fill their info</p>
           </div>
-          {selected.size > 0 && (
+          <div className="flex items-center gap-3">
+            {selected.size > 0 && (
+              <button
+                onClick={deleteSelected}
+                disabled={deleting}
+                className="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors disabled:opacity-50"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete {selected.size} selected
+              </button>
+            )}
             <button
-              onClick={deleteSelected}
-              disabled={deleting}
-              className="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors disabled:opacity-50"
+              onClick={openModal}
+              className="inline-flex items-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Delete {selected.size} selected
+              Add Client
             </button>
-          )}
+          </div>
         </div>
 
         {clients.length > 0 && (
@@ -123,11 +184,19 @@ export default function ClientsPage() {
               </svg>
             </div>
             <h2 className="text-lg font-semibold text-gray-800 mb-1">No clients yet</h2>
-            <p className="text-sm text-gray-400">Clients are saved automatically when you generate an estimate.</p>
+            <p className="text-sm text-gray-400 mb-5">Add a client manually or they&apos;ll be saved automatically when you generate an estimate.</p>
+            <button
+              onClick={openModal}
+              className="inline-flex items-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add First Client
+            </button>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            {/* Select all header */}
             <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 bg-gray-50/50">
               <input
                 type="checkbox"
@@ -170,6 +239,114 @@ export default function ClientsPage() {
           </div>
         )}
       </div>
+
+      {/* Add Client Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900">Add New Client</h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal form */}
+            <form onSubmit={handleAddClient} className="px-6 py-5 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Full Name <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="John Smith"
+                  autoFocus
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Street Address</label>
+                <input
+                  type="text"
+                  value={form.address}
+                  onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
+                  placeholder="123 Main St"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">City, State ZIP</label>
+                <input
+                  type="text"
+                  value={form.cityStateZip}
+                  onChange={e => setForm(f => ({ ...f, cityStateZip: e.target.value }))}
+                  placeholder="Springfield, IL 62701"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-colors"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone</label>
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                    placeholder="(555) 555-5555"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                    placeholder="john@email.com"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-colors"
+                  />
+                </div>
+              </div>
+
+              {formError && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {formError}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? 'Saving...' : 'Save Client'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }
