@@ -170,6 +170,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Auto-save estimate as a reference for future pricing
+    if (estimateData && Array.isArray(estimateData.line_items)) {
+      try {
+        const jobType = (estimateData.summary as string)
+          || (estimateData.line_items as { description?: string }[])[0]?.description
+          || 'Estimate';
+        const pricingNotes = (estimateData.line_items as { description?: string; details?: string; total?: number }[])
+          .map((item) => `${item.description || ''}${item.details ? ': ' + item.details : ''}${item.total ? ' — $' + item.total : ''}`)
+          .join('\n');
+        await prisma.referenceEstimate.create({
+          data: {
+            jobType: jobType.slice(0, 200),
+            clientName: (estimateData.client_name as string) || null,
+            extractedJson: estimateData,
+            pricingNotes,
+            total: typeof estimateData.total === 'number' ? estimateData.total : null,
+            originalFilename: null,
+          },
+        });
+      } catch {
+        // Non-fatal
+      }
+    }
+
     const finalMessages: Message[] = [
       ...updatedMessages,
       { role: 'assistant', content: assistantResponse },
