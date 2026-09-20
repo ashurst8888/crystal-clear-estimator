@@ -66,6 +66,7 @@ const TERMS = [
   '**If for any reason the Contract needs to be Voided, a one-time fee of $250 is to be paid for Cancellation of this Contract.',
   '**Final Payment is due on the day of Completion. Late Fees will apply.',
   'Attached is our Business Insurance',
+  'cid:EE7E8421-8B0D-4AB2-A39F-1F00598EB71D',
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
