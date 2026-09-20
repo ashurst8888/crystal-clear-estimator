@@ -45,3 +45,23 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ client });
 }
+
+export async function DELETE(request: NextRequest) {
+  if (!isAuthenticated(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    if (Array.isArray(body.ids)) {
+      await prisma.client.deleteMany({ where: { id: { in: body.ids } } });
+    } else {
+      if (!body.id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+      await prisma.client.delete({ where: { id: body.id } });
+    }
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('Clients DELETE error:', err);
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
+  }
+}

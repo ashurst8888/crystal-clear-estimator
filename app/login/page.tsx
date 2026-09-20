@@ -15,7 +15,6 @@ function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       const res = await fetch('/api/login', {
         method: 'POST',
@@ -23,10 +22,8 @@ function LoginForm() {
         body: JSON.stringify({ password }),
       });
       const data = await res.json();
-
       if (data.success) {
-        const from = searchParams.get('from') || '/dashboard';
-        router.push(from);
+        router.push(searchParams.get('from') || '/dashboard');
         router.refresh();
       } else {
         setError('Incorrect password. Please try again.');
@@ -39,47 +36,69 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#111827] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          {/* Blue header band with logo */}
-          <div className="bg-[#2563eb] px-8 py-8 flex flex-col items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo.png"
-              alt="Crystal Clear"
-              className="h-16 w-auto object-contain"
-            />
-            <p className="text-white/80 text-sm mt-3 font-medium tracking-wide">
-              Cleaning & Contracting
+    <div className="min-h-screen flex">
+      {/* Left panel — brand */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#0f172a] flex-col items-center justify-center p-12 relative overflow-hidden">
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
+          backgroundSize: '40px 40px'
+        }} />
+        {/* Glow */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#2563eb] rounded-full opacity-10 blur-3xl" />
+
+        <div className="relative z-10 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Crystal Clear" className="h-24 w-auto object-contain mx-auto mb-8" />
+          <h1 className="text-3xl font-bold text-white mb-3">Crystal Clear</h1>
+          <p className="text-slate-400 text-lg">Cleaning & Contracting</p>
+          <div className="mt-10 pt-10 border-t border-white/10">
+            <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">
+              Professional estimating tool for generating accurate, branded quotes in minutes.
             </p>
           </div>
+        </div>
 
-          {/* Form section */}
-          <div className="px-8 py-7">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Welcome back</h2>
-            <p className="text-sm text-gray-500 mb-6">Sign in to access the estimator</p>
+        <div className="absolute bottom-8 text-slate-600 text-xs">
+          Authorized personnel only
+        </div>
+      </div>
+
+      {/* Right panel — form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-slate-50">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center mb-8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Crystal Clear" className="h-16 w-auto object-contain mx-auto mb-3" />
+            <h1 className="text-xl font-bold text-slate-900">Crystal Clear Estimator</h1>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/60 p-8">
+            <div className="mb-7">
+              <h2 className="text-2xl font-bold text-slate-900">Welcome back</h2>
+              <p className="text-slate-500 text-sm mt-1">Sign in to access the estimator</p>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-1.5">
                   Password
                 </label>
                 <input
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb] transition-colors bg-gray-50 placeholder:text-gray-400"
-                  placeholder="Enter password"
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-colors"
+                  placeholder="Enter your password"
                   required
                   autoFocus
                 />
               </div>
 
               {error && (
-                <div className="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-3 flex items-center gap-2">
+                <div className="flex items-center gap-2.5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
                   <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -90,7 +109,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm tracking-wide"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -103,10 +122,6 @@ function LoginForm() {
                 ) : 'Sign In'}
               </button>
             </form>
-
-            <p className="text-center text-xs text-gray-400 mt-6">
-              Authorized personnel only
-            </p>
           </div>
         </div>
       </div>
@@ -117,8 +132,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#111827] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-slate-200 border-t-[#2563eb] rounded-full animate-spin" />
       </div>
     }>
       <LoginForm />

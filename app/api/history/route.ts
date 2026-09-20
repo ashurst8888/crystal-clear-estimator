@@ -52,10 +52,14 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const { id } = await request.json();
-    if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-
-    await prisma.conversation.delete({ where: { id } });
+    const body = await request.json();
+    // Support bulk delete (ids array) or single delete (id string)
+    if (Array.isArray(body.ids)) {
+      await prisma.conversation.deleteMany({ where: { id: { in: body.ids } } });
+    } else {
+      if (!body.id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+      await prisma.conversation.delete({ where: { id: body.id } });
+    }
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('History DELETE error:', err);
