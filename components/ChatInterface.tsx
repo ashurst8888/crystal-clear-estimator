@@ -113,19 +113,15 @@ export function ChatInterface({
   );
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [speechAvailable, setSpeechAvailable] = useState(false);
   const [listening, setListening] = useState(false);
   const [speechError, setSpeechError] = useState('');
+  const [transcribing, setTranscribing] = useState(false);
   const [savedClients, setSavedClients] = useState<SavedClient[]>([]);
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
-
-  useEffect(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    setSpeechAvailable(!!SR);
-  }, []);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     fetch('/api/clients')
@@ -220,46 +216,54 @@ export function ChatInterface({
     }
   }
 
-  function toggleListening() {
-    if (!speechAvailable) return;
-
+  async function toggleListening() {
     if (listening) {
-      recognitionRef.current?.stop();
+      // Stop recording — this triggers onstop which sends to Whisper
+      mediaRecorderRef.current?.stop();
       setListening(false);
       return;
     }
 
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
 
-    const recognition = new SR();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const transcript = event.results[0][0].transcript;
-      setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
-    };
-    recognition.onend = () => {
-      setListening(false);
-    };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recognition.onerror = (event: any) => {
-      setListening(false);
-      if (event.error === 'not-allowed') {
-        setSpeechError('Microphone access denied. Allow mic access in your browser settings.');
-      } else if (event.error === 'no-speech') {
-        setSpeechError('No speech detected. Try again.');
-      } else {
-        setSpeechError('Voice input failed. Try again.');
-      }
-      setTimeout(() => setSpeechError(''), 4000);
-    };
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
 
-    recognitionRef.current = recognition;
-    recognition.start();
-    setListening(true);
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setTranscribing(true);
+        try {
+          const formData = new FormData();
+          formData.append('audio', audioBlob, 'recording.webm');
+          const res = await fetch('/api/transcribe', { method: 'POST', body: formData });
+          const data = await res.json();
+          if (data.transcript) {
+            setInput((prev) => (prev ? `${prev} ${data.transcript}` : data.transcript));
+          } else {
+            setSpeechError(data.error || 'Could not transcribe audio. Try again.');
+            setTimeout(() => setSpeechError(''), 6000);
+          }
+        } catch {
+          setSpeechError('Transcription failed. Try again.');
+          setTimeout(() => setSpeechError(''), 4000);
+        } finally {
+          setTranscribing(false);
+        }
+      };
+
+      mediaRecorder.start();
+      setListening(true);
+    } catch {
+      setSpeechError('Microphone access denied. Allow mic access in your browser settings.');
+      setTimeout(() => setSpeechError(''), 5000);
+    }
   }
 
   return (
@@ -463,19 +467,23 @@ export function ChatInterface({
             />
             <button
               type="button"
-              onClick={speechAvailable ? toggleListening : undefined}
-              disabled={!speechAvailable}
-              title={speechAvailable ? (listening ? 'Stop recording' : 'Voice input') : 'Voice input not supported in this browser'}
+              onClick={transcribing ? undefined : toggleListening}
+              disabled={transcribing}
+              title={transcribing ? 'Transcribing...' : listening ? 'Stop recording' : 'Voice input'}
               className={`absolute right-3 bottom-3 p-1.5 rounded-full transition-colors ${
-                !speechAvailable
-                  ? 'text-gray-300 cursor-not-allowed'
+                transcribing
+                  ? 'text-blue-400 cursor-wait'
                   : listening
                   ? 'text-red-500 bg-red-50'
                   : 'text-gray-400 hover:text-[#2563eb] hover:bg-[#2563eb]/10'
               }`}
-              aria-label={listening ? 'Stop recording' : 'Start voice input'}
+              aria-label={transcribing ? 'Transcribing...' : listening ? 'Stop recording' : 'Start voice input'}
             >
-              {listening ? (
+              {transcribing ? (
+                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+              ) : listening ? (
                 <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3zm-1 19.93V22h2v-1.07A8.001 8.001 0 0020 13h-2a6 6 0 01-12 0H4a8.001 8.001 0 007 7.93z"/>
                 </svg>

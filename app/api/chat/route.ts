@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAuthenticated } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { chatWithClaude } from '@/lib/claude';
+import { chatWithClaude, calculatePricingFromReferences } from '@/lib/claude';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       ? conversation.messages
       : []) as Message[];
 
-    // Query references based on message content
+    // Load ALL references — send everything so Claude never misses relevant pricing
     const allReferences = await prisma.referenceEstimate.findMany({
       select: {
         id: true,
@@ -88,19 +88,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Score and pick top 3 most relevant
-    const messageWords = message.split(/\s+/);
-    type RefRecord = { jobType: string; pricingNotes: string; clientName: string | null; total: number | null; id: string };
-    const scored = (allReferences as RefRecord[])
-      .map((r: RefRecord) => ({ ref: r, score: scoreReference(r, messageWords) }))
-      .sort((a: { score: number }, b: { score: number }) => b.score - a.score)
-      .slice(0, 3)
-      .filter((s: { score: number }) => s.score > 0 || allReferences.length <= 3)
-      .map((s: { ref: RefRecord }) => s.ref);
-
-    // If we got no score matches, just take first 3
-    const topRefs = scored.length > 0 ? scored : allReferences.slice(0, 3);
-    const referenceContext = buildReferenceContext(topRefs);
+    const referenceContext = buildReferenceContext(allReferences as { jobType: string; pricingNotes: string; clientName: string | null; total: number | null }[]);
 
     // Build message history for Claude
     const updatedMessages: Message[] = [
@@ -108,7 +96,13 @@ export async function POST(request: NextRequest) {
       { role: 'user', content: message },
     ];
 
-    const assistantResponse = await chatWithClaude(updatedMessages, referenceContext);
+    // Pre-calculate pricing from references so Claude uses real numbers
+    const pricingCalc = await calculatePricingFromReferences(updatedMessages, referenceContext);
+    const fs = require('fs');
+    fs.appendFileSync('/tmp/cc-debug.log', `[${new Date().toISOString()}] PRICING CALC: ${pricingCalc ? pricingCalc.slice(0, 500) : 'EMPTY'}\n`);
+    console.log('[PRICING CALC RESULT]:', pricingCalc ? pricingCalc.slice(0, 500) : 'EMPTY');
+
+    const assistantResponse = await chatWithClaude(updatedMessages, referenceContext, pricingCalc || undefined);
 
     // Check if assistant returned an estimate JSON
     let estimateData: Record<string, unknown> | null = null;

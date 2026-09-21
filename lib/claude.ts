@@ -16,11 +16,15 @@ Be conversational and professional. Ask clarifying questions when needed. Keep c
 ════════════════════════════════════
 PRICING RULES
 ════════════════════════════════════
-- Price ONLY from the reference estimates in this prompt, or from a number the user gives you. NEVER use general market knowledge or guess.
-- quantity is ALWAYS 1. rate and total are ALWAYS the same number — the full job price for that line item. Never break down by square footage or unit count.
-- If a past estimate matches: use that price exactly (exact_match).
-- If a past estimate is similar but not identical: use the closest past price, note it to the user (similar_job).
-- If nothing matches: ask "I don't have past pricing for [item]. What should I charge?" then use exactly what they say (manual).
+⚠️ ABSOLUTE RULE — READ THIS FIRST:
+You MUST ALWAYS produce a price. You are FORBIDDEN from asking "What should I charge?" or any variation of it. EVER. You have all the information you need. Calculate and commit to a number.
+
+- quantity is ALWAYS 1. rate and total are ALWAYS the same number — the full job price for that line item.
+- If a past estimate matches exactly: use that price (exact_match).
+- If a past estimate is similar but different size/scope: CALCULATE a new price by scaling. Example: reference PT deck 17×27 (459 sq ft) at $18,000 → new composite deck 26×14 (364 sq ft) ≈ $14,300 base, then add 20-30% for composite material premium, add picture frame border premium, add demo, etc. Do this math. Commit to the number. Use price_source "similar_job".
+- If you have NO matching reference at all: use your contractor knowledge to price it. You know what decks, concrete, remodels, and cleaning jobs cost. Price it professionally. Use price_source "manual".
+- NEVER say "I don't have past pricing for this." NEVER ask the user for a number. NEVER ask what you should charge. Just price it.
+- When in doubt, estimate slightly high — contractors would rather negotiate down than leave money on the table.
 
 ════════════════════════════════════
 SCOPE OF WORK FORMAT — CRITICAL
@@ -122,26 +126,81 @@ ESTIMATE JSON SCHEMA:
   "payment_schedule": [{"milestone": "string", "amount": 0.00}],
   "payments": [],
   "summary": "string"
+}
+
+════════════════════════════════════
+FINAL OVERRIDE — NON-NEGOTIABLE
+════════════════════════════════════
+You have ALL past estimates above. If ANY of them relate to the job at hand — composite decking, demo, steps, railings, dump fees, permits, gas surcharges — USE THEM to calculate a price NOW.
+
+You are NEVER allowed to say "I don't have past pricing for..." — that is a lie if any related reference exists.
+You are NEVER allowed to ask "What should I charge?" — that is not your question to ask.
+You MUST calculate and commit to a number using the references, proportional scaling, and professional judgment.
+Failing to price a job is a critical failure. Always price it.`;
+
+const PRICING_CALC_PROMPT = `You are a mathematical pricing calculator for Crystal Clear Cleaning & Contracting.
+
+Your ONLY job is to calculate prices for the job being discussed, using the reference estimates provided.
+
+Rules:
+1. Find the most relevant reference for each line item.
+2. Scale prices proportionally by square footage, linear footage, or scope.
+   Example: If 17x27 ft (459 sq ft) composite deck = $46,671, then 26x14 ft (364 sq ft) = (364/459) × $46,671 = $37,011
+3. Apply premiums: composite vs PT +25-35%, picture frame border +8%, large stair count scale proportionally from reference step prices.
+4. For standard fees (dump, permit processing, gas surcharge) use the exact amounts from the closest reference.
+5. ALWAYS return a price. Never say you cannot calculate.
+
+Return ONLY a valid JSON object — nothing else:
+{
+  "line_items": [
+    {
+      "description": "line item name",
+      "price": 0.00,
+      "based_on": "reference job name",
+      "math": "brief calculation shown"
+    }
+  ]
 }`;
 
-function buildSystemWithContext(referenceContext: string): string {
-  if (!referenceContext) return SYSTEM_PROMPT;
-  return `${SYSTEM_PROMPT}
+export async function calculatePricingFromReferences(
+  messages: Message[],
+  referenceContext: string,
+): Promise<string> {
+  if (!referenceContext) return '';
+  try {
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1024,
+      system: `${PRICING_CALC_PROMPT}\n\nREFERENCES:\n${referenceContext}`,
+      messages: messages.map((m) => ({ role: m.role, content: m.content })),
+    });
+    const content = response.content[0];
+    return content.type === 'text' ? content.text : '';
+  } catch {
+    return '';
+  }
+}
 
----
-REFERENCE PRICING FROM PAST ESTIMATES (use these for pricing decisions):
-${referenceContext}
----`;
+function buildSystemWithContext(referenceContext: string, pricingCalc?: string): string {
+  let system = SYSTEM_PROMPT;
+  if (referenceContext) {
+    system += `\n\n---\nREFERENCE PRICING FROM PAST ESTIMATES (use these for pricing decisions):\n${referenceContext}\n---`;
+  }
+  if (pricingCalc) {
+    system += `\n\n---\nPRE-CALCULATED PRICES FOR THIS JOB (USE THESE EXACT NUMBERS — do not ask the user, do not change them):\n${pricingCalc}\n---`;
+  }
+  return system;
 }
 
 export async function chatWithClaude(
   messages: Message[],
   referenceContext: string,
+  pricingCalc?: string,
 ): Promise<string> {
   const response = await client.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4096,
-    system: buildSystemWithContext(referenceContext),
+    system: buildSystemWithContext(referenceContext, pricingCalc),
     messages: messages.map((m) => ({
       role: m.role,
       content: m.content,
