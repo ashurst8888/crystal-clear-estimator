@@ -122,6 +122,7 @@ export function ChatInterface({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     fetch('/api/clients')
@@ -263,6 +264,31 @@ export function ChatInterface({
     } catch {
       setSpeechError('Microphone access denied. Allow mic access in your browser settings.');
       setTimeout(() => setSpeechError(''), 5000);
+    }
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    setTranscribing(true);
+    setSpeechError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload-media', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.transcript) {
+        setInput((prev) => (prev ? `${prev} ${data.transcript}` : data.transcript));
+      } else {
+        setSpeechError(data.error || 'Could not process file. Try again.');
+        setTimeout(() => setSpeechError(''), 5000);
+      }
+    } catch {
+      setSpeechError('Upload failed. Try again.');
+      setTimeout(() => setSpeechError(''), 5000);
+    } finally {
+      setTranscribing(false);
     }
   }
 
@@ -461,10 +487,33 @@ export function ChatInterface({
               onKeyDown={handleKeyDown}
               placeholder="Describe the job or ask a question..."
               rows={1}
-              className="w-full resize-none border border-gray-300 rounded-2xl px-4 py-3 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent max-h-32 overflow-y-auto"
+              className="w-full resize-none border border-gray-300 rounded-2xl px-4 py-3 pr-20 text-base focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent max-h-32 overflow-y-auto"
               style={{ minHeight: '48px' }}
               disabled={loading}
             />
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,audio/*,video/*"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            {/* Attachment button */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={transcribing}
+              title="Upload photo, audio, or video"
+              className={`absolute right-10 bottom-3 p-1.5 rounded-full transition-colors ${
+                transcribing ? 'text-gray-300 cursor-wait' : 'text-gray-400 hover:text-[#2563eb] hover:bg-[#2563eb]/10'
+              }`}
+              aria-label="Upload file"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+            </button>
             <button
               type="button"
               onClick={transcribing ? undefined : toggleListening}
