@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/login', '/api/login', '/approve'];
+const PUBLIC_PATHS = ['/login', '/api/login', '/approve', '/api/estimate-pdf', '/api/signed-pdf'];
 const COOKIE_NAME = 'cc_auth';
 
 // Edge-compatible HMAC check using Web Crypto API
