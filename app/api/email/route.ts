@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email service not configured' }, { status: 503 });
     }
 
-    const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
+    const fromEmail = process.env.BREVO_SENDER_EMAIL || 'ashurst8888@gmail.com';
     // Generate approval token and save to DB
     const token = crypto.randomBytes(32).toString('hex');
     const appUrl = process.env.APP_URL || 'http://localhost:3000';

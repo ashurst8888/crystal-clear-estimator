@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
     // Send notification email to business owner
     try {
       const brevoApiKey = process.env.BREVO_API_KEY;
-      const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
+      const fromEmail = process.env.BREVO_SENDER_EMAIL || 'ashurst8888@gmail.com';
       const notifyEmail = process.env.NOTIFY_EMAIL || fromEmail;
       if (brevoApiKey) {
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
