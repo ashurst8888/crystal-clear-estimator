@@ -322,16 +322,85 @@ export async function generateEstimatePDF(estimate: EstimateData): Promise<Uint8
     return result;
   }
 
+  // Helper: draw one text line, add new page if needed
+  async function drawLine(
+    text: string,
+    x: number,
+    size: number,
+    font: PDFFont,
+    color: ReturnType<typeof rgb>,
+  ): Promise<void> {
+    await ensureSpace(ctx, LINE_H + 4);
+    txt(ctx, text, x, ctx.y, size, font, color);
+    ctx.y -= LINE_H;
+  }
+
   for (let ri = 0; ri < estimate.line_items.length; ri++) {
     const item = estimate.line_items[ri];
 
-    // Description (bold, top of table cell)
+    // Ensure at least enough space for description + Rate/Qty/Total before starting
+    await ensureSpace(ctx, ROW_PAD_TOP + LINE_H * 2 + 10);
+
+    ctx.y -= ROW_PAD_TOP;
+
+    // Rate / Qty / Total — drawn at the TOP of the row alongside the description
+    const numY = ctx.y - (LINE_H - ITEM_SIZE);
+    const rateStr  = fmt(item.rate);
+    const totalStr = fmt(item.total);
+    const qtyStr   = String(item.quantity ?? 1);
+    rtxt(ctx, rateStr,  ML + COL_DESC + COL_RATE,                       numY, ITEM_SIZE, reg, DARK);
+    const qW = reg.widthOfTextAtSize(qtyStr, ITEM_SIZE);
+    txt(ctx, qtyStr, ML + COL_DESC + COL_RATE + (COL_QTY - qW) / 2,    numY, ITEM_SIZE, reg, DARK);
+    rtxt(ctx, totalStr, ML + COL_DESC + COL_RATE + COL_QTY + COL_TOTAL, numY, ITEM_SIZE, reg, DARK);
+
+    // ── Description (bold) ──
     const descLines = wrap(item.description, bold, ITEM_SIZE, descMaxW);
+    for (const line of descLines) {
+      await drawLine(line, ML, ITEM_SIZE, bold, DARK);
+    }
 
-    // Parse details into classified lines
+    // ── Detail lines — flow across pages naturally ──
     const detailClassified: DetailLine[] = item.details ? classifyDetailLines(item.details) : [];
+    if (detailClassified.length > 0) {
+      ctx.y -= 4;
+      for (const dl of detailClassified) {
+        if (dl.kind === 'blank') { ctx.y -= 4; continue; }
 
-    // Labor/material lines
+        if (dl.kind === 'header') {
+          ctx.y -= 2;
+          for (const wl of dl.wrappedLines) {
+            await ensureSpace(ctx, HEADER_H + 4);
+            txt(ctx, wl, ML, ctx.y, HEADER_SIZE, bold, DARK);
+            ctx.y -= HEADER_H;
+          }
+          continue;
+        }
+
+        if (dl.kind === 'bullet') {
+          for (let wi = 0; wi < dl.wrappedLines.length; wi++) {
+            await ensureSpace(ctx, LINE_H + 4);
+            if (wi === 0) txt(ctx, '\u2022', ML, ctx.y, DETAIL_SIZE, reg, DARK);
+            txt(ctx, dl.wrappedLines[wi], ML + bulletIndent, ctx.y, DETAIL_SIZE, reg, DARK);
+            ctx.y -= LINE_H;
+          }
+          continue;
+        }
+
+        if (dl.kind === 'note') {
+          for (const wl of dl.wrappedLines) {
+            await drawLine(wl, ML, DETAIL_SIZE, italic, DARK);
+          }
+          continue;
+        }
+
+        // plain
+        for (const wl of dl.wrappedLines) {
+          await drawLine(wl, ML, DETAIL_SIZE, reg, DARK);
+        }
+      }
+    }
+
+    // ── Labor/material badge lines ──
     const badgeLines: string[] = [];
     if (item.labor_only) {
       badgeLines.push('Labor Only');
@@ -346,112 +415,30 @@ export async function generateEstimatePDF(estimate: EstimateData): Promise<Uint8
       }
     }
     if (item.customer_pays_material) badgeLines.push('Customer to Pay for Material');
+    if (badgeLines.length > 0) {
+      ctx.y -= 4;
+      for (const line of badgeLines) {
+        await drawLine(line, ML, DETAIL_SIZE, reg, DARK);
+      }
+    }
 
-    // Notes from the notes array
+    // ── Notes from notes array ──
     const noteLines: string[] = [];
     for (const n of (item.notes || [])) {
       const raw = n.startsWith('*') ? n : '*' + n;
       noteLines.push(...wrap(raw, reg, DETAIL_SIZE, detailMaxW));
     }
-
-    // Calculate total height needed
-    let totalLines = descLines.length;
-    if (detailClassified.length > 0) {
-      totalLines += 0.5; // gap before details
-      for (const dl of detailClassified) {
-        totalLines += dl.wrappedLines.length * (dl.kind === 'header' ? HEADER_H / LINE_H : 1);
-        if (dl.kind === 'blank') totalLines += 0.3;
-      }
-    }
-    if (badgeLines.length > 0) totalLines += 0.5 + badgeLines.length;
-    if (noteLines.length > 0) totalLines += 0.5 + noteLines.length;
-
-    const rowH = ROW_PAD_TOP + Math.ceil(totalLines) * LINE_H + ROW_PAD_BOT;
-
-    await ensureSpace(ctx, rowH + 20);
-
-    let ty = ctx.y - ROW_PAD_TOP - (LINE_H - ITEM_SIZE);
-
-    // ── Description (bold) ──
-    for (const line of descLines) {
-      txt(ctx, line, ML, ty, ITEM_SIZE, bold, DARK);
-      ty -= LINE_H;
-    }
-
-    // ── Detail lines ──
-    if (detailClassified.length > 0) {
-      ty -= 4; // gap between description and details
-      for (const dl of detailClassified) {
-        if (dl.kind === 'blank') { ty -= 4; continue; }
-
-        if (dl.kind === 'header') {
-          // ALL-CAPS section header — bold, small gap above
-          ty -= 2;
-          for (const wl of dl.wrappedLines) {
-            txt(ctx, wl, ML, ty, HEADER_SIZE, bold, DARK);
-            ty -= HEADER_H;
-          }
-          continue;
-        }
-
-        if (dl.kind === 'bullet') {
-          // Bullet point — draw • then indented text
-          for (let wi = 0; wi < dl.wrappedLines.length; wi++) {
-            if (wi === 0) txt(ctx, '\u2022', ML, ty, DETAIL_SIZE, reg, DARK);
-            txt(ctx, dl.wrappedLines[wi], ML + bulletIndent, ty, DETAIL_SIZE, reg, DARK);
-            ty -= LINE_H;
-          }
-          continue;
-        }
-
-        if (dl.kind === 'note') {
-          for (const wl of dl.wrappedLines) {
-            txt(ctx, wl, ML, ty, DETAIL_SIZE, italic, DARK);
-            ty -= LINE_H;
-          }
-          continue;
-        }
-
-        // plain
-        for (const wl of dl.wrappedLines) {
-          txt(ctx, wl, ML, ty, DETAIL_SIZE, reg, DARK);
-          ty -= LINE_H;
-        }
-      }
-    }
-
-    // ── Labor/material badge lines ──
-    if (badgeLines.length > 0) {
-      ty -= 4;
-      for (const line of badgeLines) {
-        txt(ctx, line, ML, ty, DETAIL_SIZE, reg, DARK);
-        ty -= LINE_H;
-      }
-    }
-
-    // ── Notes from notes array ──
     if (noteLines.length > 0) {
-      ty -= 4;
+      ctx.y -= 4;
       for (const line of noteLines) {
-        txt(ctx, line, ML, ty, DETAIL_SIZE, italic, DARK);
-        ty -= LINE_H;
+        await drawLine(line, ML, DETAIL_SIZE, italic, DARK);
       }
     }
 
-    // Rate / Qty / Total — top-right of the row
-    const numY = ctx.y - ROW_PAD_TOP - (LINE_H - ITEM_SIZE);
-    const rateStr  = fmt(item.rate);
-    const totalStr = fmt(item.total);
-    const qtyStr   = String(item.quantity ?? 1);
-
-    rtxt(ctx, rateStr,  ML + COL_DESC + COL_RATE,                       numY, ITEM_SIZE, reg, DARK);
-    const qW = reg.widthOfTextAtSize(qtyStr, ITEM_SIZE);
-    txt(ctx, qtyStr, ML + COL_DESC + COL_RATE + (COL_QTY - qW) / 2,    numY, ITEM_SIZE, reg, DARK);
-    rtxt(ctx, totalStr, ML + COL_DESC + COL_RATE + COL_QTY + COL_TOTAL, numY, ITEM_SIZE, reg, DARK);
-
-    ctx.y -= rowH;
+    ctx.y -= ROW_PAD_BOT;
 
     // Thin divider after each row
+    await ensureSpace(ctx, 4);
     hline(ctx.page, ML, PW - MR, ctx.y, 0.5, RULE_GRAY);
     ctx.y -= 2;
   }
