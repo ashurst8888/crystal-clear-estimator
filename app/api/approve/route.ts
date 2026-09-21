@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma';
 import { generateEstimatePDF } from '@/lib/pdf';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import crypto from 'crypto';
-import { Resend } from 'resend';
 
 export async function POST(request: NextRequest) {
   try {
@@ -151,11 +150,10 @@ export async function POST(request: NextRequest) {
 
     // Send notification email to business owner
     try {
-      const resendApiKey = process.env.RESEND_API_KEY;
-      const fromEmail = process.env.FROM_EMAIL;
+      const brevoApiKey = process.env.BREVO_API_KEY;
+      const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
       const notifyEmail = process.env.NOTIFY_EMAIL || fromEmail;
-      if (resendApiKey && fromEmail) {
-        const resend = new Resend(resendApiKey);
+      if (brevoApiKey) {
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
         const signedPdfUrl = `${appUrl}/api/signed-pdf?id=${approval.id}`;
         const notifTotal = estimate.total
@@ -190,11 +188,15 @@ export async function POST(request: NextRequest) {
   </div>
 </div>`;
 
-        await resend.emails.send({
-          from: `Crystal Clear Estimator <${fromEmail}>`,
-          to: [notifyEmail!],
-          subject: `✅ ${approval.clientName} signed their estimate — ${notifTotal}`,
-          html: notifHtml,
+        await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: { 'api-key': brevoApiKey, 'content-type': 'application/json' },
+          body: JSON.stringify({
+            sender: { name: 'Crystal Clear Estimator', email: fromEmail },
+            to: [{ email: notifyEmail }],
+            subject: `✅ ${approval.clientName} signed their estimate — ${notifTotal}`,
+            htmlContent: notifHtml,
+          }),
         });
       }
     } catch (notifErr) {

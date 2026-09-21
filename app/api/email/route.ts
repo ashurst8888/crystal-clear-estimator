@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAuthenticated } from '@/lib/auth';
 import { generateEstimatePDF } from '@/lib/pdf';
-import { Resend } from 'resend';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import fs from 'fs';
@@ -30,13 +29,12 @@ export async function POST(request: NextRequest) {
       ? `$${Number(estimateJson.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
       : '';
 
-    const resendApiKey = process.env.RESEND_API_KEY;
-    if (!resendApiKey) {
+    const brevoApiKey = process.env.BREVO_API_KEY;
+    if (!brevoApiKey) {
       return NextResponse.json({ error: 'Email service not configured' }, { status: 503 });
     }
 
-    const resend = new Resend(resendApiKey);
-    const fromEmail = process.env.FROM_EMAIL || 'noreply@crystalclearcontractors.com';
+    const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
     const filename = `estimate_${invNum ? invNum.replace('#', '') + '_' : ''}${clientName.replace(/\s+/g, '_')}.pdf`;
 
     // Generate approval token and save to DB
@@ -140,19 +138,26 @@ export async function POST(request: NextRequest) {
   </div>
 </div>`;
 
-    await resend.emails.send({
-      from: `Crystal Clear Contracting <${fromEmail}>`,
-      to: [toEmail],
-      subject: `Your Estimate ${invNum} — Crystal Clear Cleaning & Contracting`,
-      text: emailBody,
-      html: htmlBody,
-      attachments: [
-        {
-          filename,
-          content: pdfBuffer,
-        },
-      ],
+    const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': brevoApiKey,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: 'Crystal Clear Cleaning & Contracting', email: fromEmail },
+        to: [{ email: toEmail, name: clientName }],
+        subject: `Your Estimate ${invNum} — Crystal Clear Cleaning & Contracting`,
+        textContent: emailBody,
+        htmlContent: htmlBody,
+        attachment: [{ name: filename, content: pdfBuffer.toString('base64') }],
+      }),
     });
+
+    if (!brevoRes.ok) {
+      const err = await brevoRes.text();
+      throw new Error(`Brevo error: ${err}`);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {
