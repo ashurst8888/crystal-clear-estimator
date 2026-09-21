@@ -153,6 +153,7 @@ export async function POST(request: NextRequest) {
     try {
       const resendApiKey = process.env.RESEND_API_KEY;
       const fromEmail = process.env.FROM_EMAIL;
+      const notifyEmail = process.env.NOTIFY_EMAIL || fromEmail;
       if (resendApiKey && fromEmail) {
         const resend = new Resend(resendApiKey);
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
@@ -191,7 +192,7 @@ export async function POST(request: NextRequest) {
 
         await resend.emails.send({
           from: `Crystal Clear Estimator <${fromEmail}>`,
-          to: [fromEmail],
+          to: [notifyEmail!],
           subject: `✅ ${approval.clientName} signed their estimate — ${notifTotal}`,
           html: notifHtml,
         });
