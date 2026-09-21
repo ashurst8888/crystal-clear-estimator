@@ -35,19 +35,6 @@ function buildReferenceContext(
     .join('\n\n');
 }
 
-function scoreReference(
-  ref: { jobType: string; pricingNotes: string },
-  messageWords: string[],
-): number {
-  const haystack = `${ref.jobType} ${ref.pricingNotes}`.toLowerCase();
-  let score = 0;
-  for (const word of messageWords) {
-    if (word.length > 3 && haystack.includes(word.toLowerCase())) {
-      score++;
-    }
-  }
-  return score;
-}
 
 export async function POST(request: NextRequest) {
   if (!isAuthenticated(request)) {
@@ -98,9 +85,6 @@ export async function POST(request: NextRequest) {
 
     // Pre-calculate pricing from references so Claude uses real numbers
     const pricingCalc = await calculatePricingFromReferences(updatedMessages, referenceContext);
-    const fs = require('fs');
-    fs.appendFileSync('/tmp/cc-debug.log', `[${new Date().toISOString()}] PRICING CALC: ${pricingCalc ? pricingCalc.slice(0, 500) : 'EMPTY'}\n`);
-    console.log('[PRICING CALC RESULT]:', pricingCalc ? pricingCalc.slice(0, 500) : 'EMPTY');
 
     const assistantResponse = await chatWithClaude(updatedMessages, referenceContext, pricingCalc || undefined);
 

@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ transcript: transcription.text });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error('Transcription error:', err?.message || err);
     return NextResponse.json({ error: err?.message || 'Transcription failed' }, { status: 500 });
