@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAuthenticated } from '@/lib/auth';
-import { generateEstimatePDF } from '@/lib/pdf';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import fs from 'fs';
@@ -19,10 +18,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Generate PDF
-    const pdfBytes = await generateEstimatePDF(estimateJson);
-    const pdfBuffer = Buffer.from(pdfBytes);
-
     const clientName = estimateJson.client_name || 'Customer';
     const invNum = estimateJson.invoice_number ? `#${estimateJson.invoice_number}` : '';
     const total = estimateJson.total
@@ -35,8 +30,6 @@ export async function POST(request: NextRequest) {
     }
 
     const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
-    const filename = `estimate_${invNum ? invNum.replace('#', '') + '_' : ''}${clientName.replace(/\s+/g, '_')}.pdf`;
-
     // Generate approval token and save to DB
     const token = crypto.randomBytes(32).toString('hex');
     const appUrl = process.env.APP_URL || 'http://localhost:3000';
@@ -51,7 +44,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const approvalSection = `\n\n✍️ SIGN THIS ESTIMATE:\n${approvalLink}\n\nTap the link above, check the consent box, and sign with your finger. No app or account needed — takes about 30 seconds.`;
+    const pdfLink = `${appUrl}/api/estimate-pdf?token=${token}`;
+    const approvalSection = `\n\n✍️ SIGN THIS ESTIMATE:\n${approvalLink}\n\nTap the link above, check the consent box, and sign with your finger. No app or account needed — takes about 30 seconds.\n\n📄 DOWNLOAD PDF:\n${pdfLink}`;
 
     const emailBody = message
       ? `${message}${approvalSection}\n\nPlease find your estimate attached.`
@@ -132,6 +126,11 @@ export async function POST(request: NextRequest) {
       </a>
     </div>
     <p style="color:#6b7280;font-size:14px">Sign with your finger — no account or app needed.</p>
+    <div style="text-align:center;margin:16px 0">
+      <a href="${pdfLink}" style="background:#f3f4f6;color:#111;text-decoration:none;font-size:15px;font-weight:600;padding:12px 32px;border-radius:10px;display:inline-block;border:1px solid #e5e7eb">
+        📄 Download PDF
+      </a>
+    </div>
     <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
     <p style="color:#6b7280;font-size:14px;margin:0">Questions? Call us at <strong>(513) 614-8080</strong><br/>
     crystalclearcontracting@yahoo.com &nbsp;|&nbsp; crystalclearcontractors.com</p>
@@ -150,7 +149,6 @@ export async function POST(request: NextRequest) {
         subject: `Your Estimate ${invNum} — Crystal Clear Cleaning & Contracting`,
         textContent: emailBody,
         htmlContent: htmlBody,
-        attachment: [{ name: filename, content: pdfBuffer.toString('base64') }],
       }),
     });
 
