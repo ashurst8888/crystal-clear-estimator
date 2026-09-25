@@ -175,11 +175,11 @@ export function ChatInterface({
           }),
         });
 
-        if (!res.ok) {
-          throw new Error('Request failed');
-        }
-
         const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Request failed');
+        }
         const assistantMsg: ChatMessage = {
           role: 'assistant',
           content: data.message,
@@ -189,12 +189,13 @@ export function ChatInterface({
         if (data.estimate) {
           setCurrentEstimate(data.estimate);
         }
-      } catch {
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'Unknown error';
         setMessages((prev) => [
           ...prev,
           {
             role: 'assistant',
-            content: 'Sorry, something went wrong. Please try again.',
+            content: `Error: ${errMsg}`,
           },
         ]);
       } finally {
