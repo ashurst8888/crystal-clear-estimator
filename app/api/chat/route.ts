@@ -172,9 +172,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // If the response is an estimate JSON, store it as JSON so the frontend can render it properly
+    // rather than showing raw text
+    const savedContent = estimateData
+      ? JSON.stringify(estimateData)
+      : assistantResponse;
+
     const finalMessages: Message[] = [
       ...updatedMessages,
-      { role: 'assistant', content: assistantResponse },
+      { role: 'assistant', content: savedContent },
     ];
 
     // Save conversation
