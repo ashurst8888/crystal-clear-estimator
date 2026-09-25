@@ -77,16 +77,45 @@ export async function POST(request: NextRequest) {
 
     const referenceContext = buildReferenceContext(allReferences as { jobType: string; pricingNotes: string; clientName: string | null; total: number | null }[]);
 
-    // Build message history for Claude
+    // Build message history for Claude — replace stored JSON estimates with compact summaries
+    // to avoid blowing up context when references + history are combined
+    const sanitizedHistory: Message[] = existingMessages.map((m) => {
+      if (m.role !== 'assistant') return m;
+      const start = m.content.indexOf('{');
+      const end = m.content.lastIndexOf('}');
+      if (start === -1 || end <= start) return m;
+      try {
+        const parsed = JSON.parse(m.content.slice(start, end + 1));
+        if (!Array.isArray(parsed.line_items)) return m;
+        const clientPart = parsed.client_name ? ` for ${parsed.client_name}` : '';
+        const totalPart = parsed.total ? ` totaling $${Number(parsed.total).toLocaleString()}` : '';
+        const items = (parsed.line_items as { description?: string; total?: number }[])
+          .map((li) => `  - ${li.description || 'Item'}${li.total ? ': $' + Number(li.total).toLocaleString() : ''}`)
+          .join('\n');
+        return {
+          role: 'assistant' as const,
+          content: `[Estimate generated${clientPart}${totalPart}]\nLine items:\n${items}`,
+        };
+      } catch {
+        return m;
+      }
+    });
+
     const updatedMessages: Message[] = [
-      ...existingMessages,
+      ...sanitizedHistory,
       { role: 'user', content: message },
     ];
 
     // Pre-calculate pricing from references so Claude uses real numbers
     const pricingCalc = await calculatePricingFromReferences(updatedMessages, referenceContext);
 
-    const assistantResponse = await chatWithClaude(updatedMessages, referenceContext, pricingCalc || undefined);
+    let assistantResponse: string;
+    try {
+      assistantResponse = await chatWithClaude(updatedMessages, referenceContext, pricingCalc || undefined);
+    } catch (claudeErr) {
+      console.error('Claude API error:', claudeErr);
+      throw claudeErr;
+    }
 
     // Check if assistant returned an estimate JSON
     let estimateData: Record<string, unknown> | null = null;
