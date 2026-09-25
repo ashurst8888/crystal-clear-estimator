@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      message: assistantResponse,
+      message: estimateData ? JSON.stringify(estimateData) : assistantResponse,
       estimate: estimateData,
       conversationId,
     });
