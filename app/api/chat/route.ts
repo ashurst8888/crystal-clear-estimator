@@ -64,18 +64,40 @@ export async function POST(request: NextRequest) {
       ? conversation.messages
       : []) as Message[];
 
-    // Load ALL references — send everything so Claude never misses relevant pricing
-    const allReferences = await prisma.referenceEstimate.findMany({
-      select: {
-        id: true,
-        jobType: true,
-        pricingNotes: true,
-        clientName: true,
-        total: true,
-      },
+    // Load references — prioritize original uploaded estimates over auto-saved ones,
+    // then cap total context to avoid blowing up Claude's context window
+    const uploadedRefs = await prisma.referenceEstimate.findMany({
+      where: { originalFilename: { not: null } },
+      select: { id: true, jobType: true, pricingNotes: true, clientName: true, total: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    const autoSavedRefs = await prisma.referenceEstimate.findMany({
+      where: { originalFilename: null },
+      select: { id: true, jobType: true, pricingNotes: true, clientName: true, total: true },
+      orderBy: { createdAt: 'desc' },
+      take: 15,
     });
 
-    const referenceContext = buildReferenceContext(allReferences as { jobType: string; pricingNotes: string; clientName: string | null; total: number | null }[]);
+    // Combine: all uploaded + recent auto-saved, cap pricingNotes per entry, cap total chars
+    const MAX_NOTES_CHARS = 600;
+    const MAX_TOTAL_CHARS = 35000;
+    const combined = [...uploadedRefs, ...autoSavedRefs].map((r) => ({
+      ...r,
+      pricingNotes: r.pricingNotes && r.pricingNotes.length > MAX_NOTES_CHARS
+        ? r.pricingNotes.slice(0, MAX_NOTES_CHARS) + '…'
+        : r.pricingNotes,
+    }));
+
+    // Trim to stay under total char budget
+    let charCount = 0;
+    const cappedRefs = combined.filter((r) => {
+      const entry = `${r.jobType} ${r.pricingNotes || ''}`;
+      if (charCount + entry.length > MAX_TOTAL_CHARS) return false;
+      charCount += entry.length;
+      return true;
+    });
+
+    const referenceContext = buildReferenceContext(cappedRefs as { jobType: string; pricingNotes: string; clientName: string | null; total: number | null }[]);
 
     // Build message history for Claude — replace stored JSON estimates with compact summaries
     // to avoid blowing up context when references + history are combined
