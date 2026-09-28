@@ -181,13 +181,10 @@ export async function calculatePricingFromReferences(
   }
 }
 
-function buildSystemWithContext(referenceContext: string, pricingCalc?: string): string {
+function buildSystemWithContext(referenceContext: string): string {
   let system = SYSTEM_PROMPT;
   if (referenceContext) {
     system += `\n\n---\nREFERENCE PRICING FROM PAST ESTIMATES (use these for pricing decisions):\n${referenceContext}\n---`;
-  }
-  if (pricingCalc) {
-    system += `\n\n---\nPRE-CALCULATED PRICES FOR THIS JOB (USE THESE EXACT NUMBERS — do not ask the user, do not change them):\n${pricingCalc}\n---`;
   }
   return system;
 }
@@ -195,12 +192,11 @@ function buildSystemWithContext(referenceContext: string, pricingCalc?: string):
 export async function chatWithClaude(
   messages: Message[],
   referenceContext: string,
-  pricingCalc?: string,
 ): Promise<string> {
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 4096,
-    system: buildSystemWithContext(referenceContext, pricingCalc),
+    system: buildSystemWithContext(referenceContext),
     messages: messages.map((m) => ({
       role: m.role,
       content: m.content,

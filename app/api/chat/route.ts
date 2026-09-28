@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAuthenticated } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { chatWithClaude, calculatePricingFromReferences } from '@/lib/claude';
+import { chatWithClaude } from '@/lib/claude';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -128,12 +128,9 @@ export async function POST(request: NextRequest) {
       { role: 'user', content: message },
     ];
 
-    // Pre-calculate pricing from references so Claude uses real numbers
-    const pricingCalc = await calculatePricingFromReferences(updatedMessages, referenceContext);
-
     let assistantResponse: string;
     try {
-      assistantResponse = await chatWithClaude(updatedMessages, referenceContext, pricingCalc || undefined);
+      assistantResponse = await chatWithClaude(updatedMessages, referenceContext);
     } catch (claudeErr) {
       console.error('Claude API error:', claudeErr);
       throw claudeErr;
